@@ -26,6 +26,16 @@ public:
     Record(double height, double base);
 
     /**
+     * @return height
+     */
+    double get_height();
+
+    /**
+     * @return base
+     */
+    double get_base();
+
+    /**
      * @param other record to compare
      * @return true if current record (triangle) has bigger area
      */
