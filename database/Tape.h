@@ -9,20 +9,20 @@
 
 class Tape {
 private:
-    const char VALUE_SEP=',';
-    const char RECORD_SEP=';';
+    const char VALUE_SEP = ',';
+    const char RECORD_SEP = ';';
 
     ///Tape path
-    const char* filepath;
+    const char *filepath;
 
     ///Size of read block
     int blockSize;
 
     ///Input handler to given file
-    std::ifstream* fileInStream;
+    std::ifstream *fileInStream;
 
     ///Output handler to given file
-    std::ofstream* fileOutStream;
+    std::ofstream *fileOutStream;
 
     ///Does end of file appeared
     bool isInFileEnded;
@@ -31,7 +31,7 @@ private:
     int blockIndex;
 
     ///Buffer for read/save data
-    std::vector<char>* block;
+    std::vector<char> *block;
 
     /**
      * Initiate tape to read from file
@@ -61,7 +61,7 @@ private:
     /**
      * Print string saved in vector
      */
-    void print_vector(std::vector<char>&);
+    void print_vector(std::vector<char> &);
 
 public:
     /**
@@ -86,7 +86,7 @@ public:
      *  cast vector<char> to double and return created object
      * @return next record from file or null if file ended
      */
-    Record* get_record();
+    Record *get_record();
 
     /**
      * Save record to file:

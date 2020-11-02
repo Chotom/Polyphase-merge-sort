@@ -16,7 +16,8 @@ private:
     /**
      * @return calculated area of triangle: (a*h)/2
      */
-    auto get_area();
+    auto get_area() const;
+
 public:
     /**
      * Constructor of record (triangle representation)
@@ -28,18 +29,18 @@ public:
     /**
      * @return height
      */
-    double get_height();
+    double get_height() const;
 
     /**
      * @return base
      */
-    double get_base();
+    double get_base() const;
 
     /**
      * @param other record to compare
      * @return true if current record (triangle) has bigger area
      */
-    auto is_area_bigger(Record *r);
+    bool is_area_bigger(Record *r);
 
     /**
      * Print values of record

@@ -1,6 +1,5 @@
 #include "Tape.h"
 
-
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
 Tape::Tape(const char *filepath, int blockSize) {
     this->filepath = filepath;
@@ -54,7 +53,7 @@ void Tape::save_record(Record *r) {
         block->at(blockIndex) = i;
         this->inc_block();
     }
-    block->at(blockIndex) = ',';
+    block->at(blockIndex) = VALUE_SEP;
     this->inc_block();
 
     // Save first second from tmp str to buffer/block
@@ -62,7 +61,7 @@ void Tape::save_record(Record *r) {
         block->at(blockIndex) = i;
         this->inc_block();
     }
-    block->at(blockIndex) = ';';
+    block->at(blockIndex) = RECORD_SEP;
     this->inc_block();
 }
 

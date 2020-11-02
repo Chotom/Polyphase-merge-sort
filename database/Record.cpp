@@ -6,20 +6,20 @@ Record::Record(double height, double base) {
     this->base = base;
 }
 
-double Record::get_height() {
+double Record::get_height() const {
     return height;
 }
 
-double Record::get_base() {
-    return this->base;
+double Record::get_base() const {
+    return base;
 }
 
-auto Record::get_area() {
+auto Record::get_area() const {
     return height * base / 2;
 }
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------
-auto Record::is_area_bigger(Record *r) {
+bool Record::is_area_bigger(Record *r) {
     if (r->get_area() < this->get_area())
         return true;
     return false;
@@ -33,4 +33,4 @@ void Record::print_record() {
     std::cout << "area: " << this->get_area() << std::endl << std::endl;
 }
 
-Record::~Record() {}
+Record::~Record() = default;
