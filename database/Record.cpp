@@ -20,7 +20,7 @@ auto Record::get_area() const {
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------
 bool Record::is_area_bigger(Record *r) {
-    if (r->get_area() < this->get_area())
+    if (r->get_area() <= this->get_area())
         return true;
     return false;
 }
