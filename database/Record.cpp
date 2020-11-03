@@ -1,21 +1,21 @@
 #include "Record.h"
 
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
-Record::Record(double height, double base) {
+Record::Record(int height, int base) {
     this->height = height;
     this->base = base;
 }
 
-double Record::get_height() const {
+int Record::get_height() const {
     return height;
 }
 
-double Record::get_base() const {
+int Record::get_base() const {
     return base;
 }
 
 auto Record::get_area() const {
-    return height * base / 2;
+    return (double)(height * base) / 2;
 }
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------

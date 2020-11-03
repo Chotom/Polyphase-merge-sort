@@ -8,10 +8,10 @@
 class Record {
 private:
     ///height of triangle
-    double height;
+    int height;
 
     ///base of triangle
-    double base;
+    int base;
 
     /**
      * @return calculated area of triangle: (a*h)/2
@@ -24,17 +24,17 @@ public:
      * @param height of triangle
      * @param base of triangle
      */
-    Record(double height, double base);
+    Record(int height, int base);
 
     /**
      * @return height
      */
-    double get_height() const;
+    int get_height() const;
 
     /**
      * @return base
      */
-    double get_base() const;
+    int get_base() const;
 
     /**
      * @param other record to compare

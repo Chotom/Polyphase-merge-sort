@@ -35,8 +35,8 @@ Record *Tape::get_record() {
     this->inc_block();
 
     // Cast string to double
-    auto height = std::stod(tmp_height.data());
-    auto base = std::stod(tmp_base.data());
+    auto height = std::stoi(tmp_height.data());
+    auto base = std::stoi(tmp_base.data());
 
     return new Record(height, base);
 }
