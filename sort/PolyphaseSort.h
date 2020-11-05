@@ -6,22 +6,25 @@
 #include "../database/Tape.h"
 #include <tuple>
 
+/**
+ * Sort given file by polyphase merge method
+ */
 class PolyphaseSort {
 private:
     /// Number of tape to Distribute
-    int tapeDistributionId;
+    int tape_distribution_id;
 
     /// Offset to read current tape
-    int tapeOffset;
+    int tape_offset;
 
     /// Number of empty series from init phase
-    int dummySeries;
+    int dummy_series;
 
-    /// Three tapes
+    /// Three tapes to distribute sorted records
     Tape *tapes[3];
 
     /// Current read records from files
-    Record *records[3];
+    std::shared_ptr<Record> records[3];
 
     /**
      * Init distribution from input into two tapes
@@ -29,7 +32,7 @@ private:
     void init_phase();
 
     /**
-     * Distribute normal series from one to tape
+     * Remove dummy series from tape
      */
     void dummy_phase();
 
@@ -39,23 +42,22 @@ private:
     void phase();
 
     /**
-     * tapeOffset = (tapeOffset + 1) % 2;
+     * tape_offset = (tape_offset + 1) % 2;
      */
     void change_tape_offset();
 
     /**
-     * (tapeDistributionId + tapeOffset + 1) % 3;
+     * (tape_distribution_id + tape_offset + 1) % 3;
      */
     int get_tape_index();
 
 public:
-    PolyphaseSort(int blockSize);
+    PolyphaseSort(int block_size);
 
     /**
      * Sort values
      */
     void sort();
-
 
     /**
      * Destructor

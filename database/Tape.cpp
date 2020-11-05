@@ -1,91 +1,90 @@
 #include "Tape.h"
 
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
-Tape::Tape(const char *filepath, int blockSize) {
+Tape::Tape(const char *filepath, int block_size) {
     this->filepath = filepath;
-    this->blockSize = blockSize;
-    this->blockIndex = 0;
-    this->block = new(std::vector<char>)(this->blockSize, 0);
+    this->block_size = block_size;
+    this->block_index = 0;
+    this->block.resize(this->block_size, 0);
 
-    this->fileInStream = nullptr;
-    this->fileOutStream = nullptr;
+    this->file_in_stream = nullptr;
+    this->file_out_stream = nullptr;
 }
 
-Record *Tape::get_record() {
+auto Tape::get_record() -> std::shared_ptr<Record> {
     // Create input handler to file
-    if (fileInStream == nullptr) init_read();
+    if (file_in_stream == nullptr) init_read();
 
     // Return dummy record
-    if (isInFileEnded) return nullptr;
+    if (is_input_ended and block_index == block_size) return nullptr;
 
-    std::vector<char> tmp_height, tmp_base;
-
-    // Read first value to tmp vector from buffer/block
-    while (block->at(blockIndex) != VALUE_SEP) {
-        tmp_height.push_back(block->at(blockIndex));
-        this->inc_block();
+    std::string tmp_height, tmp_base;
+    // Read first value to tmp string from buffer/block
+    while (block[block_index] != VALUE_SEP) {
+        tmp_height.push_back(block[block_index]);
+        inc_block();
     }
-    this->inc_block();
+    inc_block();
 
     // Read second value to tmp vector from buffer/block
-    while (block->at(blockIndex) != RECORD_SEP) {
-        tmp_base.push_back(block->at(blockIndex));
-        this->inc_block();
+    while (block[block_index] != RECORD_SEP) {
+        tmp_base.push_back(block[block_index]);
+        inc_block();
     }
-    this->inc_block();
+    inc_block();
 
-    // Cast string to double
-    auto height = std::stoi(tmp_height.data());
-    auto base = std::stoi(tmp_base.data());
+    // Cast string to int
+    auto height = std::stoi(tmp_height);
+    auto base = std::stoi(tmp_base);
 
-    return new Record(height, base);
+    return  std::make_shared<Record>(height, base);
 }
 
-void Tape::save_record(Record *r) {
+void Tape::save_record(const std::shared_ptr<Record>& r) {
     // Create output handler to file
-    if (fileOutStream == nullptr) init_save();
+    if (file_out_stream == nullptr) init_save();
 
     auto tmp_height = std::to_string(r->get_height());
     auto tmp_base = std::to_string(r->get_base());
 
     // Save first value from tmp str to buffer/block
     for (auto i : tmp_height) {
-        block->at(blockIndex) = i;
-        this->inc_block();
+        block[block_index] = i;
+        inc_block();
     }
-    block->at(blockIndex) = VALUE_SEP;
-    this->inc_block();
+    block[block_index] = VALUE_SEP;
+    inc_block();
 
-    // Save first second from tmp str to buffer/block
+    // Save second value from tmp str to buffer/block
     for (auto i : tmp_base) {
-        block->at(blockIndex) = i;
-        this->inc_block();
+        block[block_index] = i;
+        inc_block();
     }
-    block->at(blockIndex) = RECORD_SEP;
-    this->inc_block();
+    block[block_index] = RECORD_SEP;
+    inc_block();
 }
 
 void Tape::close_tape() {
-    if (fileOutStream != nullptr) {
+    if (file_out_stream != nullptr) {
         // Save out stream
-        blockSize = blockIndex;
+        block_size = block_index;
         save_block();
 
         // Clear out stream
-        fileOutStream->close();
-        delete fileOutStream;
-        this->fileOutStream = nullptr;
+        file_out_stream->close();
+        delete file_out_stream;
+        file_out_stream = nullptr;
     }
-    else if (fileInStream != nullptr) {
+    else if (file_in_stream != nullptr) {
         // Clear in stream
-        fileInStream->close();
-        delete fileInStream;
-        this->fileInStream = nullptr;
-        this->isInFileEnded = false;
+        file_in_stream->close();
+        delete file_in_stream;
+        file_in_stream = nullptr;
+        is_input_ended = false;
     }
-
-    this->blockIndex = 0;
-    this->blockSize = block->size();
+    //reset block
+    block_index = 0;
+    block_size = block.size();
 }
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------
@@ -93,7 +92,7 @@ void Tape::init_read() {
     this->close_tape();
 
     // Open in stream
-    this->fileInStream = new std::ifstream(filepath, std::ifstream::binary);
+    this->file_in_stream = new std::ifstream(filepath, std::ifstream::binary);
     this->get_block();
 }
 
@@ -101,36 +100,36 @@ void Tape::init_save() {
     this->close_tape();
 
     // Open out stream
-    this->fileOutStream = new std::ofstream(filepath, std::ofstream::binary);
+    this->file_out_stream = new std::ofstream(filepath, std::ofstream::binary);
 }
 
 void Tape::inc_block() {
-    if (++blockIndex == blockSize) {
-        blockIndex = 0;
-        if (fileInStream != nullptr)
+    if (++block_index == block_size) {
+        block_index = 0;
+        if (file_in_stream != nullptr)
             get_block();
-        else if (fileOutStream != nullptr)
+        else if (file_out_stream != nullptr)
             save_block();
     }
 }
 
 void Tape::get_block() {
-    if (fileInStream != nullptr and !isInFileEnded) {
-        fileInStream->read(block->data(), block->size());
-        blockSize = fileInStream->gcount();
-        if (fileInStream->eof()) isInFileEnded = true;
+    if (file_in_stream != nullptr and !is_input_ended) {
+        file_in_stream->read(block.data(), block.size());
+        if (file_in_stream->eof()) is_input_ended = true;
+        block_size = file_in_stream->gcount();
+    } else {
+        block_size = 0;
     }
 }
 
 void Tape::save_block() {
-    if (fileOutStream != nullptr)
-        fileOutStream->write(block->data(), blockSize);
+    if (file_out_stream != nullptr)
+        file_out_stream->write(block.data(), block_size);
 }
 
 Tape::~Tape() {
-    delete fileInStream;
-    delete fileOutStream;
-    delete block;
+    close_tape();
 }
 
 // LOGS ----------------------------------------------------------------------------------------------------------------

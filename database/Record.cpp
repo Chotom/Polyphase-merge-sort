@@ -6,31 +6,24 @@ Record::Record(int height, int base) {
     this->base = base;
 }
 
-int Record::get_height() const {
+auto Record::get_height() -> int {
     return height;
 }
 
-int Record::get_base() const {
+auto Record::get_base() -> int {
     return base;
 }
 
-auto Record::get_area() const {
-    return (double)(height * base) / 2;
+auto Record::is_area_bigger(std::shared_ptr<Record> &r) -> bool {
+    return (r->get_base() * r->get_height()) <= (get_base() * get_height());
 }
 
-// PRIVATE METHODS -----------------------------------------------------------------------------------------------------
-bool Record::is_area_bigger(Record *r) {
-    if (r->get_area() <= this->get_area())
-        return true;
-    return false;
-}
+Record::~Record() = default;
 
 // LOGS ----------------------------------------------------------------------------------------------------------------
 void Record::print_record() {
     std::cout << "Triangle values: " << std::endl;
     std::cout << "height: " << height << std::endl;
     std::cout << "base: " << base << std::endl;
-    std::cout << "area: " << this->get_area() << std::endl << std::endl;
 }
 
-Record::~Record() = default;

@@ -4,7 +4,11 @@
  * Record in file - representation of triangle (height and base of triangle)
  **********************************************************************************************************************/
 #include <iostream>
+#include <memory>
 
+/**
+ * Storage for single record from file that represents values of triangle
+ */
 class Record {
 private:
     ///height of triangle
@@ -13,14 +17,9 @@ private:
     ///base of triangle
     int base;
 
-    /**
-     * @return calculated area of triangle: (a*h)/2
-     */
-    auto get_area() const;
-
 public:
     /**
-     * Constructor of record (triangle representation)
+     * Constructor of record
      * @param height of triangle
      * @param base of triangle
      */
@@ -29,26 +28,26 @@ public:
     /**
      * @return height
      */
-    int get_height() const;
+    auto get_height() -> int;
 
     /**
      * @return base
      */
-    int get_base() const;
+    auto get_base() -> int;
 
     /**
-     * @param other record to compare
-     * @return true if current record (triangle) has bigger area
+     * @param r other record to compare
+     * @return true if current record (triangle) has bigger or equal area
      */
-    bool is_area_bigger(Record *r);
-
-    /**
-     * Print values of record
-     */
-    void print_record();
+    auto is_area_bigger(std::shared_ptr<Record> &r) -> bool;
 
     /**
      * Destructor
      */
     ~Record();
+
+    /**
+     * Print values of record
+     */
+    void print_record();
 };
