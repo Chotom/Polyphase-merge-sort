@@ -21,7 +21,7 @@ private:
     int dummy_series;
 
     /// Three tapes to distribute sorted records
-    Tape *tapes[3];
+    std::unique_ptr<Tape> tapes[3];
 
     /// Current read records from files
     std::shared_ptr<Record> records[3];
@@ -52,7 +52,7 @@ private:
     int get_tape_index();
 
 public:
-    PolyphaseSort(int block_size);
+    explicit PolyphaseSort(int block_size);
 
     /**
      * Sort values

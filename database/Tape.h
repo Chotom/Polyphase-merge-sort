@@ -29,10 +29,10 @@ private:
     std::vector<char> block;
 
     ///Input handler to given file
-    std::ifstream *file_in_stream;
+    std::ifstream file_in_stream;
 
     ///Output handler to given file
-    std::ofstream *file_out_stream;
+    std::ofstream file_out_stream;
 
     ///Does end of file appeared
     bool is_input_ended;

@@ -3,9 +3,9 @@
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
 PolyphaseSort::PolyphaseSort(int block_size) {
     //init tapes
-    this->tapes[0] = new Tape("database/tapes/tape1.txt", block_size);
-    this->tapes[1] = new Tape("database/tapes/tape2.txt", block_size);
-    this->tapes[2] = new Tape("database/tapes/tape3.txt", block_size);
+    this->tapes[0] = std::make_unique<Tape>("database/tapes/tape1.txt", block_size);
+    this->tapes[1] = std::make_unique<Tape>("database/tapes/tape2.txt", block_size);
+    this->tapes[2] = std::make_unique<Tape>("database/tapes/tape3.txt", block_size);
     this->tape_distribution_id = 2;
     this->tape_offset = 0;
     this->dummy_series = 0;
@@ -19,8 +19,10 @@ PolyphaseSort::PolyphaseSort(int block_size) {
 void PolyphaseSort::sort() {
     init_phase();
     dummy_phase();
-    while (records[0] != nullptr or records[1] != nullptr or records[2] != nullptr) phase();
+    while (records[0] or records[1] or records[2]) phase();
 }
+
+PolyphaseSort::~PolyphaseSort() = default;
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------
 void PolyphaseSort::init_phase() {
@@ -33,7 +35,7 @@ void PolyphaseSort::init_phase() {
     tapes[tape_save_id]->save_record(prev_r);
 
     // Read all records from tape
-    while ((r = tapes[tape_distribution_id]->get_record()) != nullptr) {
+    while ((r = tapes[tape_distribution_id]->get_record())) {
         // Series ended
         if (!r->is_area_bigger(prev_r)) ++series_counter;
 
@@ -46,7 +48,7 @@ void PolyphaseSort::init_phase() {
             tape_save_id = get_tape_index();
 
             // Does series merge with previous record in tape
-            series_counter = (records[tape_save_id] != nullptr and r->is_area_bigger(records[tape_save_id])) ? -1 : 0;
+            series_counter = (records[tape_save_id] and r->is_area_bigger(records[tape_save_id])) ? -1 : 0;
 
             // Calc Fibonacci
             std::tie(fib0, fib1) = (fib1 == 0) ? std::make_tuple(0, 1) : std::make_tuple(fib1, fib0 + fib1);
@@ -71,15 +73,19 @@ void PolyphaseSort::dummy_phase() {
     int input_ids[2] = {(tape_distribution_id + 1) % 3, (tape_distribution_id + 2) % 3};
 
     // Init records
-    records[input_ids[0]] = records[input_ids[0]] == nullptr ? tapes[input_ids[0]]->get_record() : records[input_ids[0]];
-    records[input_ids[1]] = records[input_ids[1]] == nullptr ? tapes[input_ids[1]]->get_record() : records[input_ids[1]];
+    if(!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
+    if(!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
+    std::shared_ptr<Record> r;
 
     // Read dummy series
-    std::shared_ptr<Record> r;
     while (dummy_series) {
+        // Save record from normal series
         tapes[tape_distribution_id]->save_record(records[input_ids[tape_offset]]);
 
+        // Read next record from same tape
         r = tapes[input_ids[tape_offset]]->get_record();
+
+        // Does series end
         if (!r->is_area_bigger(records[input_ids[tape_offset]]))
             --dummy_series;
         records[input_ids[tape_offset]] = r;
@@ -92,23 +98,23 @@ void PolyphaseSort::phase() {
     int input_ids[2] = {(tape_distribution_id + 1) % 3, (tape_distribution_id + 2) % 3};
 
     // Init records
-    records[input_ids[0]] = records[input_ids[0]] == nullptr ? tapes[input_ids[0]]->get_record() : records[input_ids[0]];
-    records[input_ids[1]] = records[input_ids[1]] == nullptr ? tapes[input_ids[1]]->get_record() : records[input_ids[1]];
-    tape_offset = (records[input_ids[0]]->is_area_bigger(records[input_ids[1]])) ? 1 : 0;
-
-    // Read series and one tape up to end
+    if(!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
+    if(!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
+    tape_offset = (int)(records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
     std::shared_ptr<Record> r;
+
+    // Read one tape and all series up to end
     while (!is_tape_end or !(is_series_end[0] and is_series_end[1])) {
         // Init new series
         if (!is_tape_end and is_series_end[0] and is_series_end[1]) {
             std::tie(is_series_end[0], is_series_end[1]) = std::make_tuple(false, false);
-            tape_offset = (records[input_ids[0]]->is_area_bigger(records[input_ids[1]])) ? 1 : 0;
+            tape_offset = (int)(records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
         }
 
         tapes[tape_distribution_id]->save_record(records[input_ids[tape_offset]]);
 
         // End of tape
-        if (r = tapes[input_ids[tape_offset]]->get_record(); r == nullptr) {
+        if (!(r = tapes[input_ids[tape_offset]]->get_record())) {
             is_tape_end = true;
             is_series_end[tape_offset] = true;
             records[input_ids[tape_offset]] = nullptr;
@@ -142,10 +148,4 @@ void PolyphaseSort::change_tape_offset() {
 
 int PolyphaseSort::get_tape_index() {
     return (tape_distribution_id + tape_offset + 1) % 3;
-}
-
-PolyphaseSort::~PolyphaseSort() {
-    delete tapes[0];
-    delete tapes[1];
-    delete tapes[2];
 }
