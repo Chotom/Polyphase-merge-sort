@@ -37,10 +37,10 @@ auto Tape::get_record() -> std::shared_ptr<Record> {
     auto height = std::stoi(tmp_height);
     auto base = std::stoi(tmp_base);
 
-    return  std::make_shared<Record>(height, base);
+    return std::make_shared<Record>(height, base);
 }
 
-void Tape::save_record(const std::shared_ptr<Record>& r) {
+void Tape::save_record(const std::shared_ptr<Record> &r) {
     // Create output handler to file
     if (!file_out_stream.is_open()) init_save();
 
@@ -64,20 +64,10 @@ void Tape::save_record(const std::shared_ptr<Record>& r) {
     inc_block();
 }
 
-void Tape::close_tape() {
-    if (file_out_stream.is_open()) {
-        // Save out stream
-        block_size = block_index;
-        save_block();
-        file_out_stream.close();
-    }
-    else if (file_in_stream.is_open()) {
-        file_in_stream.close();
-    }
-    // Reset block
-    block_index = 0;
-    block_size = block.size();
+Tape::~Tape() {
+    close_tape();
 }
+
 
 // PRIVATE METHODS -----------------------------------------------------------------------------------------------------
 void Tape::init_read() {
@@ -112,15 +102,16 @@ void Tape::save_block() {
     file_out_stream.write(block.data(), block_size);
 }
 
-Tape::~Tape() {
-    close_tape();
+void Tape::close_tape() {
+    if (file_out_stream.is_open()) {
+        // Save out stream
+        block_size = block_index;
+        save_block();
+        file_out_stream.close();
+    } else if (file_in_stream.is_open()) {
+        file_in_stream.close();
+    }
+    // Reset block
+    block_index = 0;
+    block_size = block.size();
 }
-
-// LOGS ----------------------------------------------------------------------------------------------------------------
-void Tape::print_vector(std::vector<char> &v) {
-    for (auto &val: v)
-        std::cout << val;
-    std::cout << std::endl;
-}
-
-

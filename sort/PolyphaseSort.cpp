@@ -1,11 +1,14 @@
 #include "PolyphaseSort.h"
 
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
-PolyphaseSort::PolyphaseSort(int block_size) {
+PolyphaseSort::PolyphaseSort(const char *in_filepath, const char *out_filepath, int block_size) {
+    this->out_filepath = out_filepath;
+    this->input_tape = std::make_unique<Tape>(in_filepath, block_size);
+
     //init tapes
-    this->tapes[0] = std::make_unique<Tape>("database/tapes/tape1.txt", block_size);
-    this->tapes[1] = std::make_unique<Tape>("database/tapes/tape2.txt", block_size);
-    this->tapes[2] = std::make_unique<Tape>("database/tapes/tape3.txt", block_size);
+    this->tapes[0] = std::make_unique<Tape>("database/tapes/tape1", block_size);
+    this->tapes[1] = std::make_unique<Tape>("database/tapes/tape2", block_size);
+    this->tapes[2] = std::make_unique<Tape>("database/tapes/tape3", block_size);
     this->tape_distribution_id = 2;
     this->tape_offset = 0;
     this->dummy_series = 0;
@@ -17,9 +20,19 @@ PolyphaseSort::PolyphaseSort(int block_size) {
 }
 
 void PolyphaseSort::sort() {
+    // Run all phases
     init_phase();
     dummy_phase();
     while (records[0] or records[1] or records[2]) phase();
+
+    // Close all tapes
+    tapes[0] = nullptr;
+    tapes[1] = nullptr;
+    tapes[2] = nullptr;
+
+    // Save output file
+    auto output_tape = "database/tapes/tape" + std::to_string(tape_distribution_id + 1);
+    if (std::rename(output_tape.c_str(), out_filepath)) exit(errno);
 }
 
 PolyphaseSort::~PolyphaseSort() = default;
@@ -31,11 +44,11 @@ void PolyphaseSort::init_phase() {
     auto tape_save_id = get_tape_index();
 
     // Init record
-    std::shared_ptr<Record> r, prev_r = tapes[tape_distribution_id]->get_record();
+    std::shared_ptr<Record> r, prev_r = input_tape->get_record();
     tapes[tape_save_id]->save_record(prev_r);
 
     // Read all records from tape
-    while ((r = tapes[tape_distribution_id]->get_record())) {
+    while ((r = input_tape->get_record())) {
         // Series ended
         if (!r->is_area_bigger(prev_r)) ++series_counter;
 
@@ -62,6 +75,7 @@ void PolyphaseSort::init_phase() {
     change_tape_offset();
 
     // Clear
+    input_tape = nullptr;
     records[0] = nullptr;
     records[1] = nullptr;
     records[2] = nullptr;
@@ -73,8 +87,8 @@ void PolyphaseSort::dummy_phase() {
     int input_ids[2] = {(tape_distribution_id + 1) % 3, (tape_distribution_id + 2) % 3};
 
     // Init records
-    if(!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
-    if(!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
+    if (!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
+    if (!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
     std::shared_ptr<Record> r;
 
     // Read dummy series
@@ -98,9 +112,9 @@ void PolyphaseSort::phase() {
     int input_ids[2] = {(tape_distribution_id + 1) % 3, (tape_distribution_id + 2) % 3};
 
     // Init records
-    if(!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
-    if(!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
-    tape_offset = (int)(records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
+    if (!records[input_ids[0]]) records[input_ids[0]] = tapes[input_ids[0]]->get_record();
+    if (!records[input_ids[1]]) records[input_ids[1]] = tapes[input_ids[1]]->get_record();
+    tape_offset = (int) (records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
     std::shared_ptr<Record> r;
 
     // Read one tape and all series up to end
@@ -108,7 +122,7 @@ void PolyphaseSort::phase() {
         // Init new series
         if (!is_tape_end and is_series_end[0] and is_series_end[1]) {
             std::tie(is_series_end[0], is_series_end[1]) = std::make_tuple(false, false);
-            tape_offset = (int)(records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
+            tape_offset = (int) (records[input_ids[0]]->is_area_bigger(records[input_ids[1]]));
         }
 
         tapes[tape_distribution_id]->save_record(records[input_ids[tape_offset]]);
@@ -138,7 +152,7 @@ void PolyphaseSort::phase() {
         }
     }
     // Switch distribution tape
-    tape_distribution_id = input_ids[tape_offset];
+    if (records[0] or records[1] or records[2]) tape_distribution_id = input_ids[tape_offset];
     records[tape_distribution_id] = nullptr;
 }
 
@@ -146,6 +160,6 @@ void PolyphaseSort::change_tape_offset() {
     tape_offset = (tape_offset + 1) % 2;
 }
 
-int PolyphaseSort::get_tape_index() {
+auto PolyphaseSort::get_tape_index() -> int {
     return (tape_distribution_id + tape_offset + 1) % 3;
 }

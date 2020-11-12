@@ -1,16 +1,19 @@
 /* *********************************************************************************************************************
  * author: Tomasz Czochański
  *
- * Input/Output handler class - simulate tape in polyphase merge sort
  **********************************************************************************************************************/
 #include "../database/Tape.h"
+#include <filesystem>
 #include <tuple>
 
 /**
- * Sort given file by polyphase merge method
+ * Sort given file by polyphase merge method and save it to given output
  */
 class PolyphaseSort {
 private:
+    /// Path to sorted output file
+    const char *out_filepath;
+
     /// Number of tape to Distribute
     int tape_distribution_id;
 
@@ -19,6 +22,9 @@ private:
 
     /// Number of empty series from init phase
     int dummy_series;
+
+    /// Input tape from file
+    std::unique_ptr<Tape> input_tape;
 
     /// Three tapes to distribute sorted records
     std::unique_ptr<Tape> tapes[3];
@@ -49,10 +55,16 @@ private:
     /**
      * (tape_distribution_id + tape_offset + 1) % 3;
      */
-    int get_tape_index();
+    auto get_tape_index() -> int;
 
 public:
-    explicit PolyphaseSort(int block_size);
+    /**
+     * Constructor of sort class
+     * @param in_filepath path to file to sort
+     * @param out_filepath path to save sorted file
+     * @param block_size
+     */
+    PolyphaseSort(const char *in_filepath, const char *out_filepath, int block_size);
 
     /**
      * Sort values

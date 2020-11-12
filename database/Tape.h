@@ -1,7 +1,6 @@
 /* *********************************************************************************************************************
  * author: Tomasz Czochański
  *
- * Input/Output handler class - simulate tape in polyphase merge sort
  **********************************************************************************************************************/
 #include <fstream>
 #include <vector>
@@ -9,7 +8,7 @@
 
 /**
  * Simulate tape in polyphase merge sort.
- * Stores input and output handlers to files, provide data block read/save mode
+ * Stores input and output handlers to files, provide data block read/write mode
  */
 class Tape {
 private:
@@ -33,9 +32,6 @@ private:
 
     ///Output handler to given file
     std::ofstream file_out_stream;
-
-    ///Does end of file appeared
-    bool is_input_ended;
 
     /**
      * Initiate tape to read from file
@@ -63,9 +59,9 @@ private:
     void save_block();
 
     /**
-     * Print string saved in vector
+     * Close all connection in tape
      */
-    void print_vector(std::vector<char> &);
+    void close_tape();
 
 public:
     /**
@@ -87,12 +83,7 @@ public:
      * Save record to file
      * @param r record to save in file
      */
-    void save_record(const std::shared_ptr<Record>& r);
-
-    /**
-     * Close all connection in tape
-     */
-    void close_tape();
+    void save_record(const std::shared_ptr<Record> &r);
 
     /**
      * Destructor

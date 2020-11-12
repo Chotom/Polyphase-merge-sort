@@ -1,13 +1,12 @@
 /* *********************************************************************************************************************
  * author: Tomasz Czochański
  *
- * Record in file - representation of triangle (height and base of triangle)
  **********************************************************************************************************************/
 #include <iostream>
 #include <memory>
 
 /**
- * Storage for single record from file that represents values of triangle
+ * Storage for single record from file that represents values of triangle (height and base)
  */
 class Record {
 private:
@@ -28,26 +27,21 @@ public:
     /**
      * @return height
      */
-    auto get_height() -> int;
+    auto get_height() const -> int;
 
     /**
      * @return base
      */
-    auto get_base() -> int;
+    auto get_base() const -> int;
 
     /**
      * @param r other record to compare
      * @return true if current record (triangle) has bigger or equal area
      */
-    auto is_area_bigger(std::shared_ptr<Record> &r) -> bool;
+    auto is_area_bigger(std::shared_ptr<Record> &r) const -> bool;
 
     /**
      * Destructor
      */
     ~Record();
-
-    /**
-     * Print values of record
-     */
-    void print_record();
 };

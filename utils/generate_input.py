@@ -52,13 +52,10 @@ if __name__ == '__main__':
     # params to set in console script
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # path to csv file with records to generate
     parser.add_argument('--output', type=str, required=True,
                         help='Path to output file')
-    # Minimum value to remove from words
     parser.add_argument('--series', type=int, default=SERIES_NUMBER,
                         help='Number of series in file, default is random')
-    # If true data will be sorted alphabetically
     parser.add_argument('--length', type=int, default=LENGTH_NUMBER,
                         help='Length of series (min 2, max 50), default is random')
 
