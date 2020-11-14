@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "Record.h"
+#include "../utils/Logger.h"
 
 /**
  * Simulate tape in polyphase merge sort.
@@ -14,6 +15,9 @@ class Tape {
 private:
     const char VALUE_SEP = ',';
     const char RECORD_SEP = ';';
+
+    /// Logger passed in constructor
+    Logger *log;
 
     ///Tape path
     const char *filepath;
@@ -71,7 +75,7 @@ public:
      * @param filepath to tape
      * @param block_size in bytes
      */
-    Tape(const char *filepath, int block_size);
+    Tape(const char *filepath, int block_size, Logger &log);
 
     /**
      * Initiate read mode if necessary and read values from file
@@ -84,6 +88,11 @@ public:
      * @param r record to save in file
      */
     void save_record(const std::shared_ptr<Record> &r);
+
+    /**
+     * Print content of tape after distribute
+     */
+    void print_tape();
 
     /**
      * Destructor

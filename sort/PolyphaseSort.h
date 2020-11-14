@@ -11,6 +11,9 @@
  */
 class PolyphaseSort {
 private:
+    /// Logger passed in constructor
+    Logger* log;
+
     /// Path to sorted output file
     const char *out_filepath;
 
@@ -64,7 +67,7 @@ public:
      * @param out_filepath path to save sorted file
      * @param block_size
      */
-    PolyphaseSort(const char *in_filepath, const char *out_filepath, int block_size);
+    PolyphaseSort(const char *in_filepath, const char *out_filepath, int block_size, Logger &log);
 
     /**
      * Sort values

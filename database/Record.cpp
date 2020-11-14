@@ -15,7 +15,7 @@ auto Record::get_base() const -> int {
 }
 
 auto Record::is_area_bigger(std::shared_ptr<Record> &r) const -> bool {
-    return (r->get_base() * r->get_height()) <= (get_base() * get_height());
+    return (long long) r->get_base() * (long long) r->get_height() <= (long long) get_base() * (long long) get_height();
 }
 
 Record::~Record() = default;

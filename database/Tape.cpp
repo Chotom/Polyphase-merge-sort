@@ -1,7 +1,8 @@
 #include "Tape.h"
 
 // PUBLIC METHODS ------------------------------------------------------------------------------------------------------
-Tape::Tape(const char *filepath, int block_size) {
+Tape::Tape(const char *filepath, int block_size, Logger &log) {
+    this->log = &log;
     this->filepath = filepath;
     this->block_size = block_size;
     this->block_index = 0;
@@ -96,10 +97,12 @@ void Tape::inc_block() {
 void Tape::get_block() {
     file_in_stream.read(block.data(), block.size());
     block_size = file_in_stream.gcount();
+    log->inc_inout_number();
 }
 
 void Tape::save_block() {
     file_out_stream.write(block.data(), block_size);
+    log->inc_inout_number();
 }
 
 void Tape::close_tape() {
@@ -114,4 +117,11 @@ void Tape::close_tape() {
     // Reset block
     block_index = 0;
     block_size = block.size();
+}
+
+void Tape::print_tape() {
+    if (file_out_stream.is_open()) {
+        close_tape();
+        log->print_file_debug(filepath);
+    }
 }
