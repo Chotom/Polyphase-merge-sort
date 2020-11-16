@@ -62,7 +62,7 @@ void Logger::print_theoretic_inout_number(long long records_number, long long fi
         //R = file_size / records_number;
         //b = B / R = block_size * records_number / file_size;
         std::cout << "[INFO] Theoretical number of read/write: ";
-        std::cout << (int) std::ceil(2 * file_size * (1.04 * log2(records_number / 2 + 1)) / block_size) << std::endl;
+        std::cout << (int) std::ceil(2 * file_size * (1.04 * log2(records_number / 2) + 1) / block_size) << std::endl;
     }
 }
 
